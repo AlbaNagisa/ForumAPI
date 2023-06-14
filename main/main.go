@@ -49,12 +49,11 @@ func main() {
 		r.Use(jwtauth.Authenticator)
 		r.Get("/auth", func(w http.ResponseWriter, r *http.Request) {
 			_, claims, _ := jwtauth.FromContext(r.Context())
-			w.Write([]byte(fmt.Sprintf("protected area. hi %v", claims["id"])))
+			var id int = int(claims["id"].(float64))
+			w.Write([]byte(fmt.Sprintf("protected area. hi %v", id)))
 		})
 
-		r.Route("/post", func(r chi.Router) {
-			r.Post("/", route.PostPost)
-		})
+		r.Post("/post", route.PostPost)
 	})
 
 	r.Route("/posts", func(r chi.Router) {

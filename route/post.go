@@ -18,8 +18,7 @@ type PostsPagination struct {
 
 func PostPost(w http.ResponseWriter, r *http.Request) {
 	_, claims, _ := jwtauth.FromContext(r.Context())
-	id := claims["id"]
-
+	var id int = int(claims["id"].(float64))
 	newPost := database.CreatePost(r.Body, id)
 
 	jsonData, err := json.Marshal(newPost)
@@ -51,7 +50,6 @@ func GetPostsPage(w http.ResponseWriter, r *http.Request) {
 func GetPosts(w http.ResponseWriter, r *http.Request) {
 
 	posts := database.GetPosts()
-
 	jsonData, err := json.Marshal(posts)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusInternalServerError)
@@ -59,6 +57,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 }
+
 func GetPost(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	post := database.GetOnePost(id)

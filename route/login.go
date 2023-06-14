@@ -5,7 +5,6 @@ import (
 	"goApi/database"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -51,8 +50,7 @@ func generateToken(id int) (string, error) {
 
 	// Définissez les revendications du token (payload)
 	claims := jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(time.Hour * 24).Unix(), // Le token expirera après 24 heures
+		"id": id,
 	}
 
 	// Créez le token JWT en utilisant les revendications et la clé secrète

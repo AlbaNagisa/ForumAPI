@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -20,15 +21,16 @@ type User struct {
 }
 
 type Post struct {
-	ID         int         `json:"id"`
-	Title      string      `json:"title"`
-	Content    string      `json:"content"`
-	Date       string      `json:"date"`
-	Tags       []string    `json:"tags"`
-	AuthorId   interface{} `json:"author_id"`
-	Prompts    []string    `json:"prompts"`
-	Images     []string    `json:"images"`
-	IsResponse bool        `json:"is_response"`
+	ID         int      `json:"id"`
+	Title      string   `json:"title"`
+	Content    string   `json:"content"`
+	Date       string   `json:"date"`
+	Tags       []string `json:"tags"`
+	AuthorId   int      `json:"author_id"`
+	Prompts    []string `json:"prompts"`
+	Images     []string `json:"images"`
+	IsResponse bool     `json:"is_response"`
+	Author     User     `json:"author"`
 }
 
 var datab *sql.DB
@@ -59,7 +61,7 @@ func CreateUser(body io.Reader) User {
 	return newUser
 }
 
-func CreatePost(body io.Reader, authorId interface{}) Post {
+func CreatePost(body io.Reader, authorId int) Post {
 	var newPost Post
 	b, _ := io.ReadAll(body)
 	json.Unmarshal(b, &newPost)
@@ -99,42 +101,15 @@ func CreatePost(body io.Reader, authorId interface{}) Post {
 
 func GetPosts() []Post {
 	var posts []Post
-	rows, err := datab.Query("SELECT * FROM Message")
+	rows, err := datab.Query("SELECT id FROM Message")
 	if err != nil {
 		log.Fatal(err)
 	}
 	for rows.Next() {
 		var post Post
-		rows.Scan(&post.ID, &post.AuthorId, &post.Date, &post.Title, &post.Content, &post.IsResponse)
-		posts = append(posts, post)
+		rows.Scan(&post.ID)
+		posts = append(posts, GetOnePost(strconv.Itoa(post.ID)))
 	}
-
-	for i := 0; i < len(posts); i++ {
-		var prompts []string
-		var images []string
-		rows, err := datab.Query("SELECT prompt FROM Prompt INNER JOIN Message_Prompt ON Message_Prompt.prompt_id = Prompt.id WHERE Message_Prompt.message_id = ?", posts[i].ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for rows.Next() {
-			var prompt string
-			rows.Scan(&prompt)
-			prompts = append(prompts, prompt)
-		}
-		posts[i].Prompts = prompts
-
-		rows, err = datab.Query("SELECT path FROM Image INNER JOIN Image_Message ON Image_Message.image_id = Image.id WHERE Image_Message.message_id = ?", posts[i].ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for rows.Next() {
-			var image string
-			rows.Scan(&image)
-			images = append(images, image)
-		}
-		posts[i].Images = images
-	}
-
 	return posts
 
 }
@@ -148,6 +123,8 @@ func GetOnePost(id string) Post {
 	for rows.Next() {
 		rows.Scan(&post.ID, &post.AuthorId, &post.Date, &post.Title, &post.Content, &post.IsResponse)
 	}
+	post.Author = GetOneUser(strconv.Itoa(post.AuthorId))
+	post.Author.Password = ""
 	var prompts []string
 	var images []string
 	rows, err = datab.Query("SELECT prompt FROM Prompt INNER JOIN Message_Prompt ON Message_Prompt.prompt_id = Prompt.id WHERE Message_Prompt.message_id = ?", post.ID)
