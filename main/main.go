@@ -52,6 +52,7 @@ func main() {
 			var id int = int(claims["id"].(float64))
 			w.Write([]byte(fmt.Sprintf("protected area. hi %v", id)))
 		})
+		r.Get("/me", route.Me)
 
 		r.Post("/post", route.PostPost)
 	})
