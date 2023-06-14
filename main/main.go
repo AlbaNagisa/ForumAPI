@@ -62,7 +62,10 @@ func main() {
 		r.Get("/page/{page}", route.GetPostsPage)
 		r.Get("/{id}", route.GetPost)
 	})
-
+	r.Route("/categories", func(r chi.Router) {
+		r.Get("/", route.GetCategories)
+		r.Get("/{id}", route.GetCategory)
+	})
 	r.Route("/users", func(r chi.Router) {
 		/* r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("All users"))

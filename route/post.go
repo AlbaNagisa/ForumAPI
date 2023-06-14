@@ -48,7 +48,6 @@ func GetPostsPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPosts(w http.ResponseWriter, r *http.Request) {
-
 	posts := database.GetPosts()
 	jsonData, err := json.Marshal(posts)
 	if err != nil {

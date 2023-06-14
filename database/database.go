@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -25,12 +26,18 @@ type Post struct {
 	Title      string   `json:"title"`
 	Content    string   `json:"content"`
 	Date       string   `json:"date"`
-	Tags       []string `json:"tags"`
+	Tags       []int    `json:"tags"`
+	TagsName   []string `json:"tagsName"`
 	AuthorId   int      `json:"author_id"`
 	Prompts    []string `json:"prompts"`
 	Images     []string `json:"images"`
 	IsResponse bool     `json:"is_response"`
 	Author     User     `json:"author"`
+}
+
+type Category struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 var datab *sql.DB
@@ -65,7 +72,7 @@ func CreatePost(body io.Reader, authorId int) Post {
 	var newPost Post
 	b, _ := io.ReadAll(body)
 	json.Unmarshal(b, &newPost)
-
+	fmt.Println(newPost)
 	newPost.AuthorId = authorId
 
 	resM, err := datab.Exec("INSERT INTO Message (title, content, date, is_response, author_id) VALUES (?, ?, ?, ?, ?)", newPost.Title, newPost.Content, newPost.Date, newPost.IsResponse, authorId)
@@ -91,6 +98,11 @@ func CreatePost(body io.Reader, authorId int) Post {
 		}
 		datab.Exec("INSERT INTO Message_Prompt (message_id, prompt_id) VALUES (?, ?)", messId, promptId)
 	}
+
+	for i := 0; i < len(newPost.Tags); i++ {
+		datab.Exec("INSERT INTO Categorie_Message (message_id, categorie_id) VALUES (?, ?)", messId, newPost.Tags[i])
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -147,9 +159,20 @@ func GetOnePost(id string) Post {
 		rows.Scan(&image)
 		images = append(images, image)
 	}
-
 	post.Images = images
 
+	rows, err = datab.Query("SELECT name FROM Categories INNER JOIN Categorie_Message ON Categorie_Message.categorie_id = Categories.id WHERE Categorie_Message.message_id = ?", post.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var tags []string
+	for rows.Next() {
+		var tag string
+		rows.Scan(&tag)
+		tags = append(tags, tag)
+	}
+	post.TagsName = tags
 	return post
 }
 
@@ -170,4 +193,25 @@ func CheckUser(email string, password string) User {
 	}
 	datab.QueryRow("SELECT * FROM Image WHERE id = ?", user.ImageProfileId).Scan(&user.ImageProfileId, &user.Image)
 	return user
+}
+
+func GetOneCategory(id string) Category {
+	var category Category
+	row := datab.QueryRow("SELECT * FROM Categories WHERE id = ?", id)
+	row.Scan(&category.ID, &category.Name)
+	return category
+}
+
+func GetCategories() []Category {
+	var categories []Category
+	rows, err := datab.Query("SELECT * FROM Categories")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var category Category
+		rows.Scan(&category.ID, &category.Name)
+		categories = append(categories, category)
+	}
+	return categories
 }

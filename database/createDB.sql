@@ -4,11 +4,15 @@ CREATE TABLE "Categorie_Message" (
 	FOREIGN KEY("message_id") REFERENCES "Message"("id"),
 	FOREIGN KEY("categorie_id") REFERENCES "Categories"("id")
 );
+SELECT name FROM Categories INNER JOIN Categorie_Message ON Categorie_Message.categorie_id = Categories.id WHERE Categorie_Message.message_id = 89;
 CREATE TABLE "Categories" (
 	"id"	INTEGER NOT NULL,
 	"name"	TEXT NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
+INSERT INTO "Categories" VALUES (1,'Anxiety');
+INSERT INTO "Categories" VALUES (2,'Depression');
+INSERT INTO "Categories" VALUES (3,'Stress');
 CREATE TABLE "Citation_Message" (
 	"message_id"	INTEGER NOT NULL,
 	"citation_id"	INTEGER NOT NULL,
