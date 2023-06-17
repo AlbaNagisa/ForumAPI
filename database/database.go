@@ -94,6 +94,13 @@ func CreateVote(body io.Reader) Vote {
 func CreateUser(body io.Reader) User {
 	var newUser User
 	json.NewDecoder(body).Decode(&newUser)
+	user := CheckUser(
+		newUser.Email,
+		newUser.Password,
+	)
+	if user.ID != 0 {
+		return user
+	}
 	res, err := datab.Exec("INSERT INTO Image (path) VALUES (?)", newUser.Image)
 	if err != nil {
 		log.Fatal(err)

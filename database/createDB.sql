@@ -4,7 +4,6 @@ CREATE TABLE "Categorie_Message" (
 	FOREIGN KEY("message_id") REFERENCES "Message"("id"),
 	FOREIGN KEY("categorie_id") REFERENCES "Categories"("id")
 );
-SELECT name FROM Categories INNER JOIN Categorie_Message ON Categorie_Message.categorie_id = Categories.id WHERE Categorie_Message.message_id = 89;
 CREATE TABLE "Categories" (
 	"id"	INTEGER NOT NULL,
 	"name"	TEXT NOT NULL,
@@ -24,16 +23,12 @@ CREATE TABLE "Image" (
 	"path"	BLOB NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
-DELETE FROM User WHERE id = 12;
 CREATE TABLE "Image_Message" (
 	"message_id"	INTEGER NOT NULL,
 	"image_id"	INTEGER NOT NULL,
 	FOREIGN KEY("message_id") REFERENCES "Message"("id"),
 	FOREIGN KEY("image_id") REFERENCES "Image"("id")
 );
-DROP TABLE IF EXISTS "Message";
-SELECT * FROM Prompt INNER JOIN Message_Prompt ON Message_Prompt.prompt_id = Prompt.id WHERE Message_Prompt.message_id = 52;
-DELETE FROM Message WHERE id = 56;
 
 CREATE TABLE "Message" (
 	"id"	INTEGER NOT NULL,
@@ -85,10 +80,5 @@ CREATE TABLE "Vote" (
 	FOREIGN KEY("message_id") REFERENCES "Message"("id")
 );
 
-DROP TABLE IF EXISTS "Vote";
-INSERT INTO "Vote" VALUES (1,96,true);
-UPDATE Vote SET vote = false WHERE user_id = 1 AND message_id = 96;
-DELETE FROM Vote WHERE user_id = 1 AND message_id = 96;
-SELECT * FROM Vote WHERE user_id = 13 AND message_id = 98;
 
-DELETE FROM Message WHERE id = 57;
+DELETE FROM User WHERE id = 16;
