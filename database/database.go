@@ -37,9 +37,10 @@ type Post struct {
 }
 
 type Vote struct {
-	UserId int  `json:"user_id"`
-	PostId int  `json:"post_id"`
-	Vote   bool `json:"vote"`
+	UserId  int  `json:"user_id"`
+	PostId  int  `json:"post_id"`
+	Vote    bool `json:"vote"`
+	Deleted bool `json:"deleted"`
 }
 
 type Category struct {
@@ -61,25 +62,35 @@ func Connect() *sql.DB {
 }
 func CreateVote(body io.Reader) Vote {
 	var vote Vote
+	var prevVote Vote
+
 	err := json.NewDecoder(body).Decode(&vote)
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := datab.Query("SELECT * FROM Vote WHERE user_id = ? AND message_id = ?", vote.UserId, vote.PostId)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
+
+	datab.QueryRow("SELECT * FROM Vote WHERE user_id = ? AND message_id = ?", vote.UserId, vote.PostId).Scan(&prevVote.UserId, &prevVote.PostId, &prevVote.Vote)
+
 	datab.Exec("DELETE FROM Vote WHERE user_id = ? AND message_id = ?", vote.UserId, vote.PostId)
-	_, err = datab.Exec("INSERT INTO Vote (user_id, message_id, vote) VALUES (?, ?, ?)", vote.UserId, vote.PostId, vote.Vote)
+	fmt.Println(prevVote, vote)
+
+	if (prevVote.Vote != vote.Vote && prevVote.UserId != 0) || prevVote.UserId == 0 {
+		_, err = datab.Exec("INSERT INTO Vote (user_id, message_id, vote) VALUES (?, ?, ?)", vote.UserId, vote.PostId, vote.Vote)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("insert", vote)
+		return vote
+	}
 	if err != nil {
 		log.Fatal(err)
-
 	}
-
+	vote.Deleted = true
+	fmt.Println("delete", vote)
 	return vote
 
 }
+
 func CreateUser(body io.Reader) User {
 	var newUser User
 	json.NewDecoder(body).Decode(&newUser)

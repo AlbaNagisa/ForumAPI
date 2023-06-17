@@ -89,3 +89,6 @@ DROP TABLE IF EXISTS "Vote";
 INSERT INTO "Vote" VALUES (1,96,true);
 UPDATE Vote SET vote = false WHERE user_id = 1 AND message_id = 96;
 DELETE FROM Vote WHERE user_id = 1 AND message_id = 96;
+SELECT * FROM Vote WHERE user_id = 13 AND message_id = 98;
+
+DELETE FROM Message WHERE id = 57;
