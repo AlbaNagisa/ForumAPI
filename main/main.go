@@ -77,5 +77,7 @@ func main() {
 		r.Post("/discord", route.PostUserDiscord)
 	})
 
+	r.Get("/auth/github", route.GithubAuth)
+
 	http.ListenAndServe(":8080", r)
 }
