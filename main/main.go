@@ -55,6 +55,7 @@ func main() {
 		r.Get("/me", route.Me)
 
 		r.Post("/post", route.PostPost)
+		r.Post("/upvote", route.PostVote)
 	})
 
 	r.Route("/posts", func(r chi.Router) {
@@ -73,6 +74,7 @@ func main() {
 		r.Get("/{id}", route.GetUser)
 
 		r.Post("/", route.PostUser)
+		r.Post("/discord", route.PostUserDiscord)
 	})
 
 	http.ListenAndServe(":8080", r)

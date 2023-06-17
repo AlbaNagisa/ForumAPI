@@ -24,6 +24,7 @@ CREATE TABLE "Image" (
 	"path"	BLOB NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
+DELETE FROM User WHERE id = 12;
 CREATE TABLE "Image_Message" (
 	"message_id"	INTEGER NOT NULL,
 	"image_id"	INTEGER NOT NULL,
@@ -32,6 +33,8 @@ CREATE TABLE "Image_Message" (
 );
 DROP TABLE IF EXISTS "Message";
 SELECT * FROM Prompt INNER JOIN Message_Prompt ON Message_Prompt.prompt_id = Prompt.id WHERE Message_Prompt.message_id = 52;
+DELETE FROM Message WHERE id = 56;
+
 CREATE TABLE "Message" (
 	"id"	INTEGER NOT NULL,
 	"author_id"	BIGINT NOT NULL,
@@ -77,7 +80,12 @@ CREATE TABLE "User" (
 CREATE TABLE "Vote" (
 	"user_id"	INTEGER NOT NULL,
 	"message_id"	INTEGER NOT NULL,
-	"vote"	INTEGER NOT NULL,
+	"vote"	NUMERIC NOT NULL,
 	FOREIGN KEY("user_id") REFERENCES "User"("id"),
 	FOREIGN KEY("message_id") REFERENCES "Message"("id")
 );
+
+DROP TABLE IF EXISTS "Vote";
+INSERT INTO "Vote" VALUES (1,96,true);
+UPDATE Vote SET vote = false WHERE user_id = 1 AND message_id = 96;
+DELETE FROM Vote WHERE user_id = 1 AND message_id = 96;
