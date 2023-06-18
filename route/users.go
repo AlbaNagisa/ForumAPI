@@ -22,11 +22,12 @@ func PostUser(w http.ResponseWriter, r *http.Request) {
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	user := database.GetOneUser(id)
+	user.Password = ""
+
 	jsonData, err := json.Marshal(user)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusInternalServerError)
 	}
-	user.Password = ""
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 }
