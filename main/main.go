@@ -72,8 +72,9 @@ func main() {
 			w.Write([]byte("All users"))
 		}) */
 		r.Get("/{id}", route.GetUser)
-
 		r.Post("/", route.PostUser)
+		r.Get("/{id}/posts", route.GetUserPost)
+		r.Get("/{id}/upvotes", route.GetUserUpvotePost)
 		r.Post("/discord", route.PostUserDiscord)
 	})
 

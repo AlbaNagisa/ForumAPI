@@ -214,7 +214,7 @@ func GetOnePost(id string) Post {
 
 	err := datab.QueryRow("SELECT * FROM Message WHERE id = ?", id).Scan(&post.ID, &post.AuthorId, &post.Date, &post.Title, &post.Content, &post.IsResponse)
 	if err != nil {
-		log.Fatal(err)
+		return post
 	}
 
 	post.Author = GetOneUser(strconv.Itoa(post.AuthorId))
@@ -364,4 +364,35 @@ func GetCategories() []Category {
 		categories = append(categories, category)
 	}
 	return categories
+}
+
+func GetUserPosts(id string) []Post {
+	var posts []Post
+	rows, err := datab.Query("SELECT id FROM Message WHERE author_id = ?", id)
+	if err != nil {
+		return []Post{}
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var post Post
+		rows.Scan(&post.ID)
+		fmt.Println(post)
+		posts = append(posts, GetOnePost(strconv.Itoa(post.ID)))
+	}
+	return posts
+}
+
+func GetUserUpvotePosts(id string) []Post {
+	var posts []Post
+	rows, err := datab.Query("SELECT id FROM Message INNER JOIN Vote ON Message.id = Vote.message_id WHERE Vote.user_id = ? AND Vote.vote = 1", id)
+	if err != nil {
+		return []Post{}
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var post Post
+		rows.Scan(&post.ID)
+		posts = append(posts, GetOnePost(strconv.Itoa(post.ID)))
+	}
+	return posts
 }

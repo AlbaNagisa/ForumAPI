@@ -40,3 +40,27 @@ func PostUserDiscord(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 }
+
+func GetUserPost(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	posts := database.GetUserPosts(id)
+	jsonData, err := json.Marshal(posts)
+
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+}
+
+func GetUserUpvotePost(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	posts := database.GetUserUpvotePosts(id)
+	jsonData, err := json.Marshal(posts)
+
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+}
