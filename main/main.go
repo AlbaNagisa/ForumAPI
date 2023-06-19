@@ -80,5 +80,9 @@ func main() {
 
 	r.Get("/auth/github", route.GithubAuth)
 
-	http.ListenAndServe(":8080", r)
+	err := http.ListenAndServe(":80", r)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 }
