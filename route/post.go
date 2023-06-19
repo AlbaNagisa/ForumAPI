@@ -35,8 +35,8 @@ func GetPostsPage(w http.ResponseWriter, r *http.Request) {
 	var dataToSend PostsPagination
 	posts := database.GetPosts()
 	pageN, _ := strconv.Atoi(page)
-
-	posts, dataToSend.HasNext, dataToSend.MaxPage = paginate(posts, 50*pageN, 50)
+	perPage := 20
+	posts, dataToSend.HasNext, dataToSend.MaxPage = paginate(posts, perPage*pageN, perPage)
 	dataToSend.Data = posts
 
 	jsonData, err := json.Marshal(dataToSend)
