@@ -80,8 +80,8 @@ CREATE TABLE "Vote" (
 	FOREIGN KEY("message_id") REFERENCES "Message"("id")
 );
 
-
+/* 
 DELETE FROM Vote WHERE user_id = 13;
 SELECT Message.* FROM Message INNER JOIN Vote ON Vote.message_id = Message.id WHERE Vote.user_id = 17;
 SELECT Message.* FROM Message INNER JOIN Vote ON Message.id = Vote.message_id WHERE Vote.user_id = 17 AND Vote.vote = 1;
-SELECT * FROM Message WHERE author_id = 17;
+SELECT * FROM Message WHERE author_id = 17; */

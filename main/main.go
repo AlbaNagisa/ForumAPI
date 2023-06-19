@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"goApi/database"
 	"goApi/route"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,6 +23,11 @@ func init() {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
 	r := chi.NewRouter()
 	db := database.Connect()
 	defer db.Close()
