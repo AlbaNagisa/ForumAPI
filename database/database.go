@@ -34,6 +34,8 @@ type Post struct {
 	IsResponse bool     `json:"is_response"`
 	Author     User     `json:"author"`
 	Votes      []Vote   `json:"votes"`
+	ParentId   int      `json:"parent_id"`
+	Responses  []Post   `json:"responses"`
 }
 
 type Vote struct {
@@ -155,6 +157,10 @@ func CreatePost(body io.Reader, authorId int) Post {
 		datab.Exec("INSERT INTO Categorie_Message (message_id, categorie_id) VALUES (?, ?)", messId, newPost.Tags[i])
 	}
 
+	if newPost.IsResponse {
+		datab.Exec("INSERT INTO Message_Response (message_id, response_id) VALUES (?, ?)", newPost.ParentId, messId)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -225,18 +231,21 @@ func GetOnePost(id string) Post {
 	imagesCh := make(chan []string)
 	tagsCh := make(chan []string)
 	voteCh := make(chan []Vote)
+	reponseCh := make(chan []Post)
 
 	// Exécuter les goroutines en parallèle pour récupérer les données
 	go getPromptsForPost(id, promptsCh)
 	go getImagesForPost(id, imagesCh)
 	go getTagsForPost(id, tagsCh)
 	go getVotesForPost(id, voteCh)
+	go getResponsesForPost(id, reponseCh)
 
 	// Récupérer les résultats des goroutines
 	post.Prompts = <-promptsCh
 	post.Images = <-imagesCh
 	post.TagsName = <-tagsCh
 	post.Votes = <-voteCh
+	post.Responses = <-reponseCh
 
 	return post
 }
@@ -279,6 +288,27 @@ func getImagesForPost(postID string, imagesCh chan<- []string) {
 	}
 
 	imagesCh <- images
+}
+
+func getResponsesForPost(postID string, responseCh chan<- []Post) {
+	rows, err := datab.Query("SELECT response_id FROM Message_Response WHERE message_id = ?", postID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var responses []Post
+	for rows.Next() {
+		var responseID string
+		err := rows.Scan(&responseID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		response := GetOnePost(responseID)
+		responses = append(responses, response)
+	}
+
+	responseCh <- responses
 }
 
 func getTagsForPost(postID string, tagsCh chan<- []string) {
@@ -376,7 +406,6 @@ func GetUserPosts(id string) []Post {
 	for rows.Next() {
 		var post Post
 		rows.Scan(&post.ID)
-		fmt.Println(post)
 		posts = append(posts, GetOnePost(strconv.Itoa(post.ID)))
 	}
 	return posts
